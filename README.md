@@ -4,7 +4,31 @@ PixelBisect is a local visual-regression forensics CLI. Give it a known-good Git
 
 > Visual testing catches tomorrow's regressions. PixelBisect finds yesterday's.
 
+<p align="center">
+  <a href="./docs/media/pixelbisect-promo.mp4">
+    <img src="./docs/media/pixelbisect-preview.gif" alt="PixelBisect finds the first bad commit and opens its visual evidence report" width="960">
+  </a>
+</p>
+
+<p align="center">
+  <strong><a href="./docs/media/pixelbisect-promo.mp4">Watch the 77-second narrated product demo</a></strong>
+  · <a href="./docs/media/pixelbisect-promo-poster.png">View full-resolution report capture</a>
+  · <a href="#reproducible-demo">Run the deterministic demo</a>
+</p>
+
 PixelBisect runs entirely on your machine. It has no runtime AI, account, database, hosted backend, or paid service.
+
+## The 30-second idea
+
+Visual-regression tests can tell you that a page is broken today. PixelBisect answers the harder forensic question: **which historical commit introduced the break?**
+
+| You provide | PixelBisect automates | You receive |
+| --- | --- | --- |
+| A local Git repository | A protected worktree and first-parent Git bisect | The exact first-bad commit |
+| Known-good and known-bad references | Install, build, serve, wait, and deterministic Chromium capture | Last-good and first-bad screenshots |
+| One URL and one CSS selector | Thresholded pixel comparison at every selected revision | An interactive offline report, highlighted diff, and culprit Git patch |
+
+The active checkout is never used for historical builds. A typical 64-commit range takes roughly six midpoint comparisons; the included demo completes in about 29 seconds on the verified Windows environment.
 
 ## Built with Codex
 

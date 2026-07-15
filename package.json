@@ -24,6 +24,7 @@
     "fixture:generate": "npm run build && node dist/fixture/generate.js",
     "reliability": "npm run build && node scripts/reliability.mjs",
     "visual:qa": "node scripts/visual-qa.mjs",
+    "verify:clean": "node scripts/clean-verify.mjs",
     "prepack": "npm run clean && npm run build"
   },
   "engines": {

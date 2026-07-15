@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.test-dist/
+.pixelbisect/
+*.tgz
+coverage/
+demo-fixture/
+test-output/
+visual-qa/
+reliability-results/
+*.log
+pixelbisect.config.json

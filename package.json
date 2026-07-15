@@ -1,0 +1,59 @@
+{
+  "name": "pixelbisect",
+  "version": "0.1.0",
+  "description": "Local visual-regression forensics powered by Git bisect",
+  "type": "module",
+  "bin": {
+    "pixelbisect": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "pixelbisect.config.example.json",
+    "PIXELBISECT_FINAL_DEMO_SPEC.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
+    "test:compile": "tsc -p tsconfig.test.json",
+    "test": "npm run build && npm run test:compile && node --test --test-concurrency=1 .test-dist/test/**/*.test.js",
+    "test:unit": "npm run build && npm run test:compile && node --test --test-concurrency=1 .test-dist/test/unit/*.test.js",
+    "test:integration": "npm run build && npm run test:compile && node --test --test-concurrency=1 .test-dist/test/integration/*.test.js",
+    "test:e2e": "npm run build && npm run test:compile && node --test --test-concurrency=1 .test-dist/test/e2e/*.test.js",
+    "fixture:generate": "npm run build && node dist/fixture/generate.js",
+    "reliability": "npm run build && node scripts/reliability.mjs",
+    "visual:qa": "node scripts/visual-qa.mjs",
+    "prepack": "npm run clean && npm run build"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "git",
+    "bisect",
+    "visual-regression",
+    "playwright",
+    "developer-tools"
+  ],
+  "license": "MIT",
+  "author": "Anas",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anasm266/pixelbisect.git"
+  },
+  "homepage": "https://github.com/anasm266/pixelbisect#readme",
+  "bugs": {
+    "url": "https://github.com/anasm266/pixelbisect/issues"
+  },
+  "dependencies": {
+    "pixelmatch": "7.2.0",
+    "playwright": "1.61.1",
+    "pngjs": "7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.6",
+    "@types/pngjs": "^6.0.5",
+    "typescript": "^5.9.2"
+  }
+}

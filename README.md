@@ -6,6 +6,20 @@ PixelBisect is a local visual-regression forensics CLI. Give it a known-good Git
 
 PixelBisect runs entirely on your machine. It has no runtime AI, account, database, hosted backend, or paid service.
 
+## Built with Codex
+
+Codex with GPT-5.6 was the primary development agent for PixelBisect. It accelerated the work from product scoping through TypeScript implementation, adversarial test design, Windows process-cleanup debugging, npm packaging, and visual inspection of the final report. The core build session's `/feedback` ID is the development audit trail to include with the Build Week submission.
+
+The most important decisions made during that collaboration were to:
+
+- Use native `git bisect run` with first-parent history instead of maintaining a custom search algorithm
+- Protect the active checkout with one detached worktree and treat interruption cleanup as a product feature
+- Keep the demo deliberately narrow and prove it against a generated 64-commit deterministic fixture
+- Make the offline HTML report—not a hosted dashboard—the product's visual UI
+- Require five consecutive full investigations, clean-clone tests, tarball installation, and rendered visual QA before calling the project complete
+
+Codex and GPT-5.6 are development tools here, not runtime dependencies. PixelBisect does not send repository code or screenshots to an AI service and requires no API key.
+
 ## What it produces
 
 One command performs endpoint verification, automated bisection, adjacent final captures, and report generation:
@@ -34,7 +48,7 @@ All images and scripts are embedded in one HTML file; no report server or networ
 - npm
 - Playwright's Chromium browser binary
 
-Windows 10/11 is the primary demo platform. PixelBisect uses Windows process-tree termination there. macOS and Linux use POSIX process-group cleanup and are supported where the Node.js, Git, npm, and Playwright requirements are available.
+Windows 10/11 is the primary and fully verified demo platform; PixelBisect uses Windows process-tree termination there. macOS and Linux use POSIX process-group cleanup and are expected to work where the Node.js, Git, npm, and Playwright requirements are available, but they are not part of the current release verification matrix.
 
 ## Installation
 

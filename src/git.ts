@@ -1,4 +1,4 @@
-import { access, stat } from 'node:fs/promises';
+import { access, rm, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { PixelBisectError } from './errors.js';
 import { runExecutable } from './processes.js';
@@ -44,10 +44,22 @@ export async function createDetachedWorktree(repoPath: string, worktreePath: str
 
 export async function removeWorktree(repoPath: string, worktreePath: string): Promise<void> {
   const normalized = path.resolve(worktreePath);
-  const removal = await git(repoPath, ['worktree', 'remove', '--force', normalized], true);
-  if (removal.code !== 0) {
-    const detail = (removal.stderr || removal.stdout).trim();
-    throw new PixelBisectError(`Could not remove temporary Git worktree ${normalized}.${detail ? `\n${detail}` : ''}`);
+  const normalizedForGit = normalized.replaceAll('\\', '/');
+  let lastDetail = '';
+  let stillRegistered = true;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const removal = await git(repoPath, ['worktree', 'remove', '--force', normalized], true);
+    if (removal.code === 0) { stillRegistered = false; break; }
+    lastDetail = (removal.stderr || removal.stdout).trim();
+    const list = await git(repoPath, ['worktree', 'list', '--porcelain'], true);
+    if (list.code === 0 && !list.stdout.includes(normalizedForGit)) { stillRegistered = false; break; }
+    await new Promise((resolve) => setTimeout(resolve, 150 * (attempt + 1)));
+  }
+  if (stillRegistered) throw new PixelBisectError(`Could not unregister temporary Git worktree ${normalized}.${lastDetail ? `\n${lastDetail}` : ''}`);
+  try {
+    await rm(normalized, { recursive: true, force: true, maxRetries: 8, retryDelay: 200 });
+  } catch (error) {
+    throw new PixelBisectError(`Could not delete temporary Git worktree files at ${normalized}.`, 2, { cause: error });
   }
 }
 

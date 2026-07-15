@@ -21,7 +21,7 @@ import {
   resolveCommit,
   verifyRepository,
 } from './git.js';
-import { runExecutable, terminateAllProcesses, isPortOpen } from './processes.js';
+import { runExecutable, terminateAllProcesses, terminateProcessesOnPort, isPortOpen } from './processes.js';
 import { generateReport } from './report.js';
 import { formatDuration } from './time.js';
 import type { EvaluationRecord, EvaluationState, ResolvedConfig, RunResult } from './types.js';
@@ -254,7 +254,7 @@ export async function runInvestigation(configPath: string, options: RunOptions =
       }
     }
     if (worktreeParent) {
-      await rm(worktreeParent, { recursive: true, force: true }).catch((error) => { cleanupError ??= errorMessage(error); });
+      await rm(worktreeParent, { recursive: true, force: true, maxRetries: 8, retryDelay: 200 }).catch((error) => { cleanupError ??= errorMessage(error); });
     }
     let worktreeRemoved = !worktreeCreated;
     try {
@@ -263,6 +263,7 @@ export async function runInvestigation(configPath: string, options: RunOptions =
     } catch (error) {
       cleanupError ??= `Could not verify worktree cleanup: ${errorMessage(error)}`;
     }
+    if (!initialPortOccupied && await isPortOpen(config.port)) await terminateProcessesOnPort(config.port);
     const portReleased = !(await isPortOpen(config.port));
     if (!portReleased && !initialPortOccupied) cleanupError ??= `Port ${config.port} remained occupied after cleanup.`;
     const cleanup = {

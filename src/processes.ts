@@ -48,6 +48,26 @@ export async function terminateAllProcesses(): Promise<void> {
   await Promise.all([...active].map((child) => terminateProcessTree(child)));
 }
 
+export async function terminateProcessesOnPort(port: number): Promise<void> {
+  if (process.platform !== 'win32') return;
+  const listing = await runExecutable('netstat', ['-ano', '-p', 'tcp'], { cwd: process.cwd(), allowFailure: true });
+  if (listing.code !== 0) return;
+  const pids = new Set<number>();
+  for (const line of listing.stdout.split(/\r?\n/)) {
+    const columns = line.trim().split(/\s+/);
+    if (columns.length < 5 || columns[0].toUpperCase() !== 'TCP') continue;
+    const local = columns[1];
+    const state = columns[3]?.toUpperCase();
+    const pid = Number.parseInt(columns.at(-1) ?? '', 10);
+    if (state === 'LISTENING' && local.endsWith(`:${port}`) && Number.isInteger(pid) && pid > 0) pids.add(pid);
+  }
+  await Promise.all([...pids].map((pid) => new Promise<void>((resolve) => {
+    const killer = spawn('taskkill', ['/PID', String(pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
+    killer.once('error', () => resolve());
+    killer.once('exit', () => resolve());
+  })));
+}
+
 export async function runExecutable(
   executable: string,
   args: string[],
@@ -170,6 +190,7 @@ export async function startServer(options: {
 
   const stop = async () => {
     await terminateProcessTree(child);
+    if (await isPortOpen(options.port)) await terminateProcessesOnPort(options.port);
     await waitForPortRelease(options.port);
   };
 

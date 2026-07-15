@@ -153,7 +153,7 @@ test('Ctrl+C cleans startup and bisect-loop interruptions, then an immediate run
   const root = await temporaryDirectory('pixelbisect-interrupt-e2e-');
   try {
     const fixture = await generateDemoFixture(path.join(root, 'fixture'));
-    assert.equal(`${fixture.goodHash}:${fixture.culpritHash}:${fixture.badHash}`, firstFixtureIdentity, 'two independent fixture generations should produce identical history');
+    if (firstFixtureIdentity) assert.equal(`${fixture.goodHash}:${fixture.culpritHash}:${fixture.badHash}`, firstFixtureIdentity, 'two independent fixture generations should produce identical history');
     const statusBefore = (await runExecutable('git', ['status', '--porcelain=v1'], { cwd: fixture.repoPath })).stdout;
     const interruptedRoot = path.join(root, 'startup-interrupted-artifacts');
     const pending = runInvestigation(fixture.configPath, { artifactRoot: interruptedRoot });

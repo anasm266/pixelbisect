@@ -48,6 +48,10 @@ test('generates one offline report with embedded images, slider, escaped reposit
   assert.equal((html.match(/data:image\/png;base64,/g) ?? []).length, 3);
   assert.match(html, /type="range"/);
   assert.match(html, /addEventListener\('input'/);
+  assert.match(html, /color-scheme:light/);
+  assert.match(html, /--accent:#e2b714/);
+  assert.match(html, /<strong>pixelbisect<\/strong>/);
+  assert.doesNotMatch(html, /(?:linear|radial)-gradient/);
   assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
   assert.match(html, /\+&lt;danger&gt;/);
   assert.doesNotMatch(html, /<script>alert\(1\)<\/script>/);

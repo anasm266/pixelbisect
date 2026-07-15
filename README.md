@@ -110,7 +110,7 @@ Copy [`pixelbisect.config.example.json`](./pixelbisect.config.example.json) to `
 | `port` | Yes | - | Integer from `1` through `65535`. PixelBisect refuses to start if it is occupied. |
 | `readinessUrl` | Yes | - | HTTP(S) URL polled until the application returns a successful response. |
 | `targetUrl` | Yes | - | HTTP(S) page URL opened in Chromium for capture. |
-| `selector` | Yes | - | CSS selector for the single element to capture. The first matching visible element is used. |
+| `selector` | Yes | - | CSS selector for the single element to capture. The first matching element must become visible. |
 | `viewport.width` | No | `1280` | Chromium viewport width in CSS pixels (`1`-`7680`). |
 | `viewport.height` | No | `720` | Chromium viewport height in CSS pixels (`1`-`4320`). |
 | `startupTimeoutMs` | No | `15000` | Maximum wait for server readiness (`100`-`600000` ms). |
@@ -242,7 +242,6 @@ The final demo gates can be rehearsed with `npm run reliability` (five consecuti
 
 ## Documentation
 
-- [Final demo specification](./PIXELBISECT_FINAL_DEMO_SPEC.md)
 - [Git bisect documentation](https://git-scm.com/docs/git-bisect)
 - [Git worktree documentation](https://git-scm.com/docs/git-worktree)
 - [Playwright browser installation](https://playwright.dev/docs/browsers)

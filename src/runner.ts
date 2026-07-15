@@ -246,7 +246,7 @@ export async function runInvestigation(configPath: string, options: RunOptions =
     process.off('SIGTERM', onSignal);
     await Promise.all([terminateAllProcesses(), closeActiveBrowsers()]).catch(() => undefined);
     let bisectStateRemoved = !bisectStarted;
-    if (worktreeCreated && worktreePath) {
+    if (worktreePath) {
       try {
         if (bisectStarted) {
           const reset = await git(worktreePath, ['bisect', 'reset'], true);

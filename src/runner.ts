@@ -245,9 +245,14 @@ export async function runInvestigation(configPath: string, options: RunOptions =
     process.off('SIGINT', onSignal);
     process.off('SIGTERM', onSignal);
     await Promise.all([terminateAllProcesses(), closeActiveBrowsers()]).catch(() => undefined);
+    let bisectStateRemoved = !bisectStarted;
     if (worktreeCreated && worktreePath) {
       try {
-        if (bisectStarted) await git(worktreePath, ['bisect', 'reset'], true);
+        if (bisectStarted) {
+          const reset = await git(worktreePath, ['bisect', 'reset'], true);
+          bisectStateRemoved = reset.code === 0;
+          if (!bisectStateRemoved) cleanupError = `Could not reset Git bisect state: ${(reset.stderr || reset.stdout).trim() || `exit code ${reset.code}`}`;
+        }
         await removeWorktree(config.repoPath, worktreePath);
       } catch (error) {
         cleanupError = errorMessage(error);
@@ -270,7 +275,7 @@ export async function runInvestigation(configPath: string, options: RunOptions =
       completedAt: new Date().toISOString(),
       worktreeRemoved,
       portReleased,
-      bisectStateRemoved: worktreeRemoved,
+      bisectStateRemoved: bisectStateRemoved && worktreeRemoved,
       error: cleanupError ?? null,
     };
     await writeFile(path.join(artifactDir, 'cleanup.json'), JSON.stringify(cleanup, null, 2), 'utf8').catch((error) => { cleanupError ??= `Could not write cleanup evidence: ${errorMessage(error)}`; });

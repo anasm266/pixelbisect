@@ -40,8 +40,9 @@ Windows 10/11 is the primary demo platform. PixelBisect uses Windows process-tre
 
 ### From source
 
+After downloading or cloning the source repository:
+
 ```bash
-git clone https://github.com/anasm266/pixelbisect.git
 cd pixelbisect
 npm ci
 npx playwright install chromium
@@ -69,14 +70,7 @@ npx playwright install chromium
 npx pixelbisect run pixelbisect.config.json
 ```
 
-For one-off use after registry publication:
-
-```bash
-npx playwright install chromium
-npx pixelbisect run pixelbisect.config.json
-```
-
-The npm registry publication is a separate release step; cloning this repository or installing its generated tarball works without it. On Linux hosts that lack Chromium system libraries, use `npx playwright install --with-deps chromium` instead.
+The npm registry publication and public source repository are separate release steps. A downloaded source tree or generated tarball works without either one. On Linux hosts that lack Chromium system libraries, use `npx playwright install --with-deps chromium` instead.
 
 ## Configuration
 

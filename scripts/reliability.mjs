@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import net from 'node:net';
 import path from 'node:path';
 
@@ -32,6 +32,21 @@ function portOpen(port) {
   });
 }
 
+async function pathExists(target) {
+  try { await access(target); return true; } catch { return false; }
+}
+
+async function inspectBisectState(repo) {
+  const refs = await command('git', ['for-each-ref', '--format=%(refname)', 'refs/bisect/'], repo);
+  const gitDirResult = await command('git', ['rev-parse', '--absolute-git-dir'], repo);
+  if (refs.code !== 0 || gitDirResult.code !== 0) throw new Error('Could not inspect Git bisect state.');
+  const gitDir = gitDirResult.stdout.trim();
+  const stateFiles = ['BISECT_START', 'BISECT_LOG', 'BISECT_NAMES', 'BISECT_TERMS', 'BISECT_ANCESTORS_OK'];
+  const presentFiles = [];
+  for (const name of stateFiles) if (await pathExists(path.join(gitDir, name))) presentFiles.push(name);
+  return { refs: refs.stdout.trim().split(/\r?\n/).filter(Boolean), presentFiles };
+}
+
 const expected = (await command('git', ['log', '--format=%H', '--fixed-strings', '--grep=fix(theme): align primary action with neutral palette', 'visual-good..visual-bad'], repoPath)).stdout.trim().split(/\r?\n/)[0];
 if (!expected) throw new Error('Could not resolve the planted fixture culprit.');
 const initialStatus = (await command('git', ['status', '--porcelain=v1'], repoPath)).stdout;
@@ -54,11 +69,12 @@ for (let index = 1; index <= 5; index += 1) {
   const cleanup = JSON.parse(await readFile(path.join(artifactDir, 'cleanup.json'), 'utf8'));
   const status = (await command('git', ['status', '--porcelain=v1'], repoPath)).stdout;
   const worktrees = (await command('git', ['worktree', 'list', '--porcelain'], repoPath)).stdout;
+  const bisectState = await inspectBisectState(repoPath);
   const checks = {
     culpritCorrect: result.culprit.hash === expected,
     statusPreserved: status === initialStatus,
     worktreeRemoved: cleanup.worktreeRemoved === true && !/pixelbisect-worktree-/i.test(worktrees),
-    bisectStateRemoved: cleanup.bisectStateRemoved === true,
+    bisectStateRemoved: cleanup.bisectStateRemoved === true && bisectState.refs.length === 0 && bisectState.presentFiles.length === 0,
     portReleased: cleanup.portReleased === true && !(await portOpen(config.port)),
     cleanupErrorFree: cleanup.error === null,
     under90Seconds: result.durationMs < 90_000,
@@ -80,6 +96,7 @@ for (let index = 1; index <= 5; index += 1) {
     reportPath,
     artifactDir,
     terminalLogPath,
+    bisectState,
     checks,
   });
   await writeFile(summaryPath, JSON.stringify({ expectedCulprit: expected, configPath, completedRuns: runs.length, runs }, null, 2), 'utf8');

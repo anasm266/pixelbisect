@@ -10,7 +10,6 @@
     "dist",
     "README.md",
     "pixelbisect.config.example.json",
-    "PIXELBISECT_FINAL_DEMO_SPEC.md",
     "LICENSE"
   ],
   "scripts": {

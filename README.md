@@ -84,6 +84,22 @@ npx pixelbisect install-browser
 npx pixelbisect run pixelbisect.config.json
 ```
 
+### Judge-ready tarball demo (no rebuild)
+
+The release tarball contains both the compiled CLI and the deterministic demo-fixture generator. A judge can exercise the complete product from a fresh directory without cloning the source or running a build:
+
+```bash
+mkdir pixelbisect-judge-test
+cd pixelbisect-judge-test
+npm init -y
+npm install --save-dev /path/to/pixelbisect-0.1.0.tgz
+npx pixelbisect install-browser
+node node_modules/pixelbisect/dist/fixture/generate.js ./demo-fixture
+npx pixelbisect run ./demo-fixture/pixelbisect.config.json
+```
+
+The last command runs the full 64-commit investigation and prints the absolute path to the generated offline HTML report. Replace the tarball path with the downloaded release asset's actual path; no npm-registry publication, source compilation, API key, account, or hosted service is required.
+
 The npm registry publication and public source repository are separate release steps. A downloaded source tree or generated tarball works without either one. On Linux hosts that lack Chromium system libraries, use `npx pixelbisect install-browser --with-deps` instead.
 
 ## Configuration

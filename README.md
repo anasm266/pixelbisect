@@ -5,16 +5,7 @@ PixelBisect is a local visual-regression forensics CLI. Give it a known-good Git
 > Visual testing catches tomorrow's regressions. PixelBisect finds yesterday's.
 
 <p align="center">
-  <a href="./docs/media/pixelbisect-promo.mp4">
-    <img src="./docs/media/pixelbisect-preview.gif" alt="PixelBisect finds the first bad commit and opens its visual evidence report" width="960">
-  </a>
-</p>
-
-<p align="center">
-  <strong>12-second clean UI walkthrough</strong>
-  · <a href="./docs/media/pixelbisect-promo.mp4">Watch the 77-second narrated product demo</a>
-  · <a href="./docs/media/pixelbisect-promo-poster.png">View full-resolution report capture</a>
-  · <a href="#reproducible-demo">Run the deterministic demo</a>
+  <img src="./docs/media/pixelbisect-preview.gif" alt="PixelBisect finds the first bad commit and opens its visual evidence report" width="960">
 </p>
 
 PixelBisect runs entirely on your machine. It has no runtime AI, account, database, hosted backend, or paid service.

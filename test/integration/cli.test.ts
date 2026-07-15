@@ -11,6 +11,7 @@ const cliPath = fileURLToPath(new URL('../../src/cli.js', import.meta.url));
 test('compiled CLI exposes help/version and one readable nonzero error for invalid input', async () => {
   const help = await runExecutable(process.execPath, [cliPath, '--help'], { cwd: process.cwd() });
   assert.match(help.stdout, /pixelbisect run <config\.json>/);
+  assert.match(help.stdout, /pixelbisect install-browser \[--with-deps\]/);
   const version = await runExecutable(process.execPath, [cliPath, '--version'], { cwd: process.cwd() });
   assert.match(version.stdout.trim(), /^\d+\.\d+\.\d+$/);
   const dir = await temporaryDirectory('pixelbisect-cli-');
@@ -21,4 +22,7 @@ test('compiled CLI exposes help/version and one readable nonzero error for inval
   assert.match(failure.stderr, /^PixelBisect error: Invalid JSON in configuration file:/);
   assert.equal(failure.stderr.trim().split(/\r?\n/).length, 1);
   assert.doesNotMatch(failure.stderr, /\n\s+at /);
+  const badInstallArgument = await runExecutable(process.execPath, [cliPath, 'install-browser', '--unknown'], { cwd: process.cwd(), allowFailure: true });
+  assert.notEqual(badInstallArgument.code, 0);
+  assert.equal(badInstallArgument.stderr.trim(), 'PixelBisect error: Usage: pixelbisect install-browser [--with-deps]');
 });

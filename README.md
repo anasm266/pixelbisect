@@ -45,9 +45,9 @@ After downloading or cloning the source repository:
 ```bash
 cd pixelbisect
 npm ci
-npx playwright install chromium
 npm run build
 npm link
+pixelbisect install-browser
 ```
 
 `npm link` exposes the local build as the `pixelbisect` command. You can instead run `node /absolute/path/to/pixelbisect/dist/cli.js` without linking it.
@@ -58,7 +58,7 @@ Once a release is published to the npm registry, install it in the project from 
 
 ```bash
 npm install --save-dev pixelbisect
-npx playwright install chromium
+npx pixelbisect install-browser
 npx pixelbisect run pixelbisect.config.json
 ```
 
@@ -66,11 +66,11 @@ For a packaged but unpublished build, replace `pixelbisect` with the tarball pat
 
 ```bash
 npm install --save-dev /path/to/pixelbisect-0.1.0.tgz
-npx playwright install chromium
+npx pixelbisect install-browser
 npx pixelbisect run pixelbisect.config.json
 ```
 
-The npm registry publication and public source repository are separate release steps. A downloaded source tree or generated tarball works without either one. On Linux hosts that lack Chromium system libraries, use `npx playwright install --with-deps chromium` instead.
+The npm registry publication and public source repository are separate release steps. A downloaded source tree or generated tarball works without either one. On Linux hosts that lack Chromium system libraries, use `npx pixelbisect install-browser --with-deps` instead.
 
 ## Configuration
 
@@ -126,11 +126,11 @@ From a source checkout of PixelBisect:
 
 ```bash
 npm ci
-npx playwright install chromium
 npm run build
+npm link
+pixelbisect install-browser
 npm run fixture:generate -- ./demo-fixture
 Copy-Item pixelbisect.config.example.json pixelbisect.config.json
-npm link
 pixelbisect run pixelbisect.config.json
 ```
 
@@ -192,7 +192,7 @@ It does not analyze merge-graph side branches, map computed CSS properties to ex
 Install the browser version required by the local Playwright dependency:
 
 ```bash
-npx playwright install chromium
+npx pixelbisect install-browser
 ```
 
 ### The configured port is occupied
@@ -223,8 +223,8 @@ The demo scope requires all selected commits to be runnable. Narrow the endpoint
 
 ```bash
 npm ci
-npx playwright install chromium
 npm run build
+node dist/cli.js install-browser
 npm run test:unit
 npm run test:integration
 npm run test:e2e

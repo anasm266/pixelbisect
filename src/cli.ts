@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runEvaluator } from './evaluate.js';
 import { PixelBisectError, errorMessage } from './errors.js';
+import { runExecutable } from './processes.js';
 import { runInvestigation } from './runner.js';
 
 async function version(): Promise<string> {
@@ -16,10 +18,21 @@ function help(): void {
 
 Usage:
   pixelbisect run <config.json>
+  pixelbisect install-browser [--with-deps]
   pixelbisect --help
   pixelbisect --version
 
 PixelBisect executes configured commands from historical commits. Use trusted repositories only.`);
+}
+
+async function installBrowser(withDependencies: boolean): Promise<void> {
+  const require = createRequire(import.meta.url);
+  const playwrightPackagePath = require.resolve('playwright/package.json');
+  const playwrightCliPath = path.join(path.dirname(playwrightPackagePath), 'cli.js');
+  const args = [playwrightCliPath, 'install', ...(withDependencies ? ['--with-deps'] : []), 'chromium'];
+  const result = await runExecutable(process.execPath, args, { cwd: process.cwd(), stream: true, allowFailure: true });
+  if (result.code !== 0) throw new PixelBisectError(`Chromium installation failed with exit code ${result.code}.`);
+  console.log('PixelBisect Chromium is installed.');
 }
 
 async function main(argv: string[]): Promise<number> {
@@ -33,6 +46,11 @@ async function main(argv: string[]): Promise<number> {
   }
   if (argv[0] === '--version' || argv[0] === '-v') {
     console.log(await version());
+    return 0;
+  }
+  if (argv[0] === 'install-browser') {
+    if (argv.length > 2 || (argv[1] && argv[1] !== '--with-deps')) throw new PixelBisectError('Usage: pixelbisect install-browser [--with-deps]');
+    await installBrowser(argv[1] === '--with-deps');
     return 0;
   }
   if (argv[0] !== 'run') throw new PixelBisectError(`Unknown command: ${argv[0]}. Run "pixelbisect --help" for usage.`);

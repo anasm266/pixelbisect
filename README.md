@@ -11,7 +11,8 @@ PixelBisect is a local visual-regression forensics CLI. Give it a known-good Git
 </p>
 
 <p align="center">
-  <strong><a href="./docs/media/pixelbisect-promo.mp4">Watch the 77-second narrated product demo</a></strong>
+  <strong>12-second clean UI walkthrough</strong>
+  · <a href="./docs/media/pixelbisect-promo.mp4">Watch the 77-second narrated product demo</a>
   · <a href="./docs/media/pixelbisect-promo-poster.png">View full-resolution report capture</a>
   · <a href="#reproducible-demo">Run the deterministic demo</a>
 </p>

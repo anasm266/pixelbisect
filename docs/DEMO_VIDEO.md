@@ -3,10 +3,12 @@
 The repository includes a finished 77.8-second narrated product reel:
 
 - [1080p master](./media/pixelbisect-promo.mp4) — H.264 video, AAC audio, 1920×1080 at 30 fps
-- [Animated README preview](./media/pixelbisect-preview.gif) — 960×540 at 10 fps
+- [Animated README preview](./media/pixelbisect-preview.gif) — a purpose-built 12-second silent loop at 800×450 and 10 fps
 - [Clean poster frame](./media/pixelbisect-promo-poster.png) — 1440×810
 
-The edit uses genuine PixelBisect output: a complete deterministic investigation, terminal progress, culprit reveal, interactive before/after slider, report scrolling, pixel evidence, tested-commit table, and Git diff. Motion consists of retiming, crossfades, smooth push-ins, reframing, captions, and title cards; it does not invent product behavior.
+The full edit uses genuine PixelBisect output: a complete deterministic investigation, terminal progress, culprit reveal, interactive before/after slider, report scrolling, pixel evidence, tested-commit table, and Git diff. Motion consists of retiming, crossfades, smooth push-ins, reframing, captions, and title cards; it does not invent product behavior.
+
+The README GIF is a separate clean edit rather than a sample of the narrated video. It contains no captions, narration, or title cards: it eases from the report overview into the culprit, preserves the real slider movement, pans through the evidence, and returns to its opening frame for a continuous loop.
 
 ## Narration
 

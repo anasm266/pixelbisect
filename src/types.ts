@@ -47,6 +47,14 @@ export interface ComparisonResult {
   height: number;
 }
 
+export type ComputedStyleSnapshot = Record<string, string>;
+
+export interface ComputedStyleDifference {
+  property: string;
+  lastGood: string;
+  firstBad: string;
+}
+
 export interface EvaluationRecord extends ComparisonResult {
   hash: string;
   shortHash: string;
@@ -78,4 +86,5 @@ export interface RunResult {
   records: EvaluationRecord[];
   durationMs: number;
   diffText: string;
+  styleDifferences: ComputedStyleDifference[];
 }

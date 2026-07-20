@@ -94,7 +94,9 @@ test('complete workflow identifies the planted culprit twice and produces a work
     assert.match(first.diffText, /\+  --button-primary: #e5e7eb/);
     const artifactFiles = await readdir(first.artifactDir, { recursive: true });
     assert.equal(artifactFiles.filter((entry) => String(entry).endsWith('install.log')).length, 1, 'unchanged lockfile should install exactly once');
-    for (const name of ['final/before.png', 'final/after.png', 'final/diff.png', 'git-bisect.log', 'cleanup.json']) await access(path.join(first.artifactDir, name));
+    for (const name of ['final/before.png', 'final/after.png', 'final/diff.png', 'final/last-good-styles.json', 'final/first-bad-styles.json', 'git-bisect.log', 'cleanup.json']) await access(path.join(first.artifactDir, name));
+    assert.ok(first.styleDifferences.some((difference) => difference.property === 'background-color'));
+    assert.ok(first.styleDifferences.some((difference) => difference.property === '--button-primary'));
     const [beforePng, afterPng] = await Promise.all([
       readFile(path.join(first.artifactDir, 'final', 'before.png')).then((buffer) => PNG.sync.read(buffer)),
       readFile(path.join(first.artifactDir, 'final', 'after.png')).then((buffer) => PNG.sync.read(buffer)),
@@ -116,6 +118,8 @@ test('complete workflow identifies the planted culprit twice and produces a work
       assert.deepEqual(naturalSizes[0], naturalSizes[1]);
       assert.match(await page.locator('body').innerText(), new RegExp(fixture.culpritHash.slice(0, 7)));
       assert.match(await page.locator('pre').innerText(), /--button-primary: #2563eb/);
+      assert.match(await page.locator('body').innerText(), /Rendered style changes/);
+      assert.match(await page.locator('body').innerText(), /background-color/);
       const slider = page.locator('#slider');
       const comparisonPng = PNG.sync.read(await page.locator('#comparison').screenshot());
       const sample = (x: number, y: number) => {

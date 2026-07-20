@@ -2,7 +2,7 @@ import { chromium, type Browser } from 'playwright';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { PixelBisectError, errorMessage } from './errors.js';
-import type { PixelBisectConfig } from './types.js';
+import type { ComputedStyleSnapshot, PixelBisectConfig } from './types.js';
 
 const captureCss = `
   *, *::before, *::after {
@@ -19,6 +19,14 @@ const captureCss = `
 `;
 
 const activeBrowsers = new Set<Browser>();
+
+export interface CaptureOptions {
+  includeComputedStyle?: boolean;
+}
+
+export interface CaptureElementResult {
+  computedStyle?: ComputedStyleSnapshot;
+}
 
 export async function closeActiveBrowsers(): Promise<void> {
   await Promise.all([...activeBrowsers].map(async (browser) => {
@@ -43,7 +51,8 @@ async function withinTimeout<T>(promise: Promise<T>, timeoutMs: number, label: s
 export async function captureElement(
   config: PixelBisectConfig,
   outputPath: string,
-): Promise<void> {
+  options: CaptureOptions = {},
+): Promise<CaptureElementResult> {
   await mkdir(path.dirname(outputPath), { recursive: true });
   const browser = await chromium.launch({ headless: true });
   activeBrowsers.add(browser);
@@ -69,6 +78,26 @@ export async function captureElement(
         await document.fonts.ready;
         await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
       }), config.captureTimeoutMs, 'Font/render settling');
+      const computedStyle = options.includeComputedStyle ? await locator.evaluate((element) => {
+        const computed = getComputedStyle(element);
+        const propertyNames = new Set<string>(Array.from(computed));
+        const visitRules = (rules: CSSRuleList): void => {
+          for (const rule of Array.from(rules)) {
+            const declaration = 'style' in rule ? (rule as CSSStyleRule).style : undefined;
+            if (declaration) {
+              for (const property of Array.from(declaration)) {
+                if (property.startsWith('--')) propertyNames.add(property);
+              }
+            }
+            const nested = 'cssRules' in rule ? (rule as CSSGroupingRule).cssRules : undefined;
+            if (nested) visitRules(nested);
+          }
+        };
+        for (const sheet of Array.from(document.styleSheets)) {
+          try { visitRules(sheet.cssRules); } catch { /* cross-origin stylesheet */ }
+        }
+        return Object.fromEntries([...propertyNames].sort().map((property) => [property, computed.getPropertyValue(property).trim()]));
+      }) : undefined;
       await locator.screenshot({
         path: outputPath,
         animations: 'disabled',
@@ -76,6 +105,7 @@ export async function captureElement(
         scale: 'css',
         timeout: config.captureTimeoutMs,
       });
+      return { computedStyle };
     } catch (error) {
       throw new PixelBisectError(`Capture failed for selector "${config.selector}" at ${config.targetUrl}: ${errorMessage(error)}`);
     } finally {

@@ -7,7 +7,8 @@ import { PixelBisectError } from './errors.js';
 import { commitInfo, currentCommit } from './git.js';
 import { runShellCommand, startServer } from './processes.js';
 import { formatDuration } from './time.js';
-import type { EvaluationRecord, EvaluationState } from './types.js';
+import { green, red } from './terminal.js';
+import type { ComputedStyleSnapshot, EvaluationRecord, EvaluationState } from './types.js';
 
 async function exists(filePath: string): Promise<boolean> {
   try { await access(filePath); return true; } catch { return false; }
@@ -55,8 +56,8 @@ async function readRecords(resultsPath: string): Promise<EvaluationRecord[]> {
 
 export async function captureCurrentCommit(
   state: EvaluationState,
-  options: { label: string; outputPath?: string },
-): Promise<{ hash: string; shortHash: string; subject: string; screenshotPath: string; durationMs: number }> {
+  options: { label: string; outputPath?: string; includeComputedStyle?: boolean },
+): Promise<{ hash: string; shortHash: string; subject: string; screenshotPath: string; durationMs: number; computedStyle?: ComputedStyleSnapshot }> {
   const started = Date.now();
   const hash = await currentCommit(state.worktreePath);
   const info = await commitInfo(state.worktreePath, hash);
@@ -85,13 +86,14 @@ export async function captureCurrentCommit(
     logPath: path.join(commitDir, 'server.log'),
   });
   const screenshotPath = options.outputPath ?? path.join(commitDir, 'screenshot.png');
+  let computedStyle: ComputedStyleSnapshot | undefined;
   try {
     console.log(`  capture  ${state.config.selector}`);
-    await captureElement(state.config, screenshotPath);
+    ({ computedStyle } = await captureElement(state.config, screenshotPath, { includeComputedStyle: options.includeComputedStyle }));
   } finally {
     await server.stop();
   }
-  return { hash, shortHash: short, subject: info.subject, screenshotPath, durationMs: Date.now() - started };
+  return { hash, shortHash: short, subject: info.subject, screenshotPath, durationMs: Date.now() - started, computedStyle };
 }
 
 export async function evaluateCurrentCommit(
@@ -126,7 +128,8 @@ export async function evaluateCurrentCommit(
     await writeFile(state.resultsPath, JSON.stringify(records, null, 2), 'utf8');
     const completed = records.length;
     const remaining = Math.max(0, state.expectedComparisons - completed);
-    console.log(`[${completed}/${state.expectedComparisons}] ${captured.shortHash}  ${record.verdict.padEnd(4)}  ${record.changedPercent.toFixed(3)}% changed  ~${remaining} remaining  elapsed ${formatDuration(Date.now() - state.startedAt)}`);
+    const verdict = record.verdict === 'GOOD' ? green(record.verdict.padEnd(4)) : red(record.verdict.padEnd(4));
+    console.log(`[${completed}/${state.expectedComparisons}] ${captured.shortHash}  ${verdict}  ${record.changedPercent.toFixed(3)}% changed  ~${remaining} remaining  elapsed ${formatDuration(Date.now() - state.startedAt)}`);
   }
   return record;
 }

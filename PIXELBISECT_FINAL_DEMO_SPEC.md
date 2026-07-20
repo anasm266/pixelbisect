@@ -286,6 +286,8 @@ Implement this only after every required story passes the complete rehearsed run
 
 ## PB-013 — Compare computed styles
 
+**Status:** Implemented in v0.1.0.
+
 > As a developer, I can see which computed CSS properties changed on the watched element so that the visual difference is easier to interpret.
 
 Acceptance criteria:

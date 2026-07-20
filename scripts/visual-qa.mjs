@@ -24,12 +24,18 @@ try {
   await slider.focus();
   await page.keyboard.press('ArrowRight');
   const keyboardValue = await slider.inputValue();
+  const copyButton = page.locator('#copy-hash');
+  await copyButton.click();
   checks = {
     titleVisible: await page.locator('h1').isVisible(),
     allImagesLoaded: await page.locator('img').evaluateAll((images) => images.length === 3 && images.every((image) => image.complete && image.naturalWidth > 0)),
     screenshotsAligned: Boolean(beforeBox && afterBox && beforeBox.x === afterBox.x && beforeBox.y === afterBox.y && beforeBox.width === afterBox.width && beforeBox.height === afterBox.height),
     sliderInputUpdates: positionAfterMouseEquivalent === '67%',
     sliderKeyboardUpdates: keyboardValue === '68',
+    copyButtonWorks: await copyButton.textContent() === 'Copied',
+    reportActionsVisible: await page.locator('.hero-actions').isVisible(),
+    styleChangesVisible: await page.getByRole('heading', { name: 'Rendered style changes' }).isVisible(),
+    styleRowsRendered: await page.locator('.style-table tbody tr').count() > 0,
     diffReadable: await page.locator('pre').isVisible(),
     noViewportOverflow: await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
     noConsoleErrors: consoleErrors.length === 0,

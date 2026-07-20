@@ -9,6 +9,7 @@
   "files": [
     "dist",
     "README.md",
+    "CHANGELOG.md",
     "pixelbisect.config.example.json",
     "LICENSE"
   ],
@@ -21,8 +22,10 @@
     "test:integration": "npm run build && npm run test:compile && node --test --test-concurrency=1 .test-dist/test/integration/*.test.js",
     "test:e2e": "npm run build && npm run test:compile && node --test --test-concurrency=1 .test-dist/test/e2e/*.test.js",
     "fixture:generate": "npm run build && node dist/fixture/generate.js",
+    "demo": "npm run build && node dist/cli.js install-browser && node dist/fixture/generate.js ./demo-fixture --force && node dist/cli.js run ./demo-fixture/pixelbisect.config.json",
     "reliability": "npm run build && node scripts/reliability.mjs",
     "visual:qa": "node scripts/visual-qa.mjs",
+    "media:record": "node scripts/record-report-demo.mjs",
     "verify:clean": "node scripts/clean-verify.mjs",
     "prepack": "npm run clean && npm run build"
   },

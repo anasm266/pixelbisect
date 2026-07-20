@@ -14,7 +14,7 @@ const http = require('node:http');
 const port = Number(process.argv[2]);
 const page = \`<!doctype html><style>
 html,body{margin:0;width:100%;height:100%;overflow:scroll}
-#target{width:200px;height:80px;overflow:scroll;background:#2563eb;color:white;animation:pulse 120ms infinite alternate;transition:all 2s}
+#target{--target-color:#2563eb;width:200px;height:80px;overflow:scroll;background:var(--target-color);color:white;animation:pulse 120ms infinite alternate;transition:all 2s}
 @keyframes pulse{from{background:#2563eb}to{background:#ef4444}}
 </style><div id="target" contenteditable="true">Deterministic capture content that overflows the fixed box.</div>\`;
 http.createServer((_req,res)=>{res.writeHead(200,{'content-type':'text/html'});res.end(page)}).listen(port,'127.0.0.1');
@@ -35,8 +35,10 @@ test('capture freezes motion and caret, hides scrollbars, and honors viewport/de
       };
       const first = path.join(dir, 'first.png');
       const second = path.join(dir, 'second.png');
-      await captureElement(config, first);
+      const captured = await captureElement(config, first, { includeComputedStyle: true });
       await captureElement(config, second);
+      assert.equal(captured.computedStyle?.width, '200px');
+      assert.equal(captured.computedStyle?.['--target-color'], '#2563eb');
       const decoded = PNG.sync.read(await readFile(first));
       assert.deepEqual({ width: decoded.width, height: decoded.height }, { width: 200, height: 80 });
       const comparison = await comparePngFiles({ baselinePath: first, candidatePath: second, diffPath: path.join(dir, 'diff.png'), pixelColorThreshold: 0, maxChangedPixelPercent: 0 });

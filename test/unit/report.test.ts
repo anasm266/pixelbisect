@@ -41,6 +41,7 @@ test('generates one offline report with embedded images, slider, escaped reposit
       screenshotPath: before, diffPath: diff, timestamp: '2025-01-01T00:00:00Z',
     }],
     durationMs: 1234, diffText: 'diff --git a/src/style.css b/src/style.css\n@@ -1,1 +1,1 @@\n+<danger>',
+    styleDifferences: [{ property: 'background-color', lastGood: 'rgb(37, 99, 235)', firstBad: '<unsafe-style>' }],
     beforeScreenshotPath: before, afterScreenshotPath: after, diffImagePath: diff,
     generatedAt: new Date('2025-01-01T00:00:00Z'),
   });
@@ -52,10 +53,15 @@ test('generates one offline report with embedded images, slider, escaped reposit
   assert.match(html, /--accent:#e2b714/);
   assert.match(html, /<strong>pixelbisect<\/strong>/);
   assert.doesNotMatch(html, /(?:linear|radial)-gradient/);
+  assert.match(html, /Rendered style changes/);
+  assert.match(html, /background-color/);
+  assert.match(html, /Copy culprit hash/);
+  assert.match(html, /Print \/ save PDF/);
+  assert.match(html, /class="diff-add"/);
   assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
   assert.match(html, /\+&lt;danger&gt;/);
   assert.doesNotMatch(html, /<script>alert\(1\)<\/script>/);
-  for (const unsafe of ['<unsafe-author>', '<unsafe-body>', '<unsafe-good-subject>', '<unsafe-record>', '<unsafe-install>']) assert.doesNotMatch(html, new RegExp(unsafe.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  for (const unsafe of ['<unsafe-author>', '<unsafe-body>', '<unsafe-good-subject>', '<unsafe-record>', '<unsafe-install>', '<unsafe-style>']) assert.doesNotMatch(html, new RegExp(unsafe.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.match(html, new RegExp('b'.repeat(40)));
   assert.match(html, /Screenshots may contain application data/);
   assert.match(html, /1 midpoint comparison/);

@@ -23,7 +23,9 @@ import {
 } from './git.js';
 import { runExecutable, terminateAllProcesses, terminateProcessesOnPort, isPortOpen } from './processes.js';
 import { generateReport } from './report.js';
+import { diffComputedStyles } from './styles.js';
 import { formatDuration } from './time.js';
+import { bold, dim, red, yellow } from './terminal.js';
 import type { EvaluationRecord, EvaluationState, ResolvedConfig, RunResult } from './types.js';
 
 function runId(repoPath: string): string {
@@ -93,10 +95,10 @@ export async function runInvestigation(configPath: string, options: RunOptions =
   process.on('SIGINT', onSignal);
   process.on('SIGTERM', onSignal);
 
-  console.log('\nPixelBisect');
-  console.log('────────────────────────────────────────────────────────────');
-  console.log('⚠ Executes install, build, and server commands from historical commits.');
-  console.log('  Run PixelBisect only on repositories you trust; a worktree is not a sandbox.\n');
+  console.log(`\n${bold('PixelBisect')}`);
+  console.log(dim('────────────────────────────────────────────────────────────'));
+  console.log(yellow('⚠ Executes install, build, and server commands from historical commits.'));
+  console.log(dim('  Run PixelBisect only on repositories you trust; a worktree is not a sandbox.\n'));
   console.log(`Good:  ${goodInfo.shortHash}  ${goodInfo.subject}`);
   console.log(`Bad:   ${badInfo.shortHash}  ${badInfo.subject}`);
   console.log(`Range: ${config.commitCount} commits (first-parent), ~${expectedComparisons} comparisons\n`);
@@ -180,12 +182,12 @@ export async function runInvestigation(configPath: string, options: RunOptions =
     const beforePath = path.join(finalDir, 'before.png');
     await checkout(worktreePath, lastGoodHash);
     assertNotInterrupted();
-    await captureCurrentCommit(state, { label: 'final-good', outputPath: beforePath });
+    const finalGoodCapture = await captureCurrentCommit(state, { label: 'final-good', outputPath: beforePath, includeComputedStyle: true });
     assertNotInterrupted();
     await checkout(worktreePath, culpritHash);
     assertNotInterrupted();
     const afterPath = path.join(finalDir, 'after.png');
-    const finalBadCapture = await captureCurrentCommit(state, { label: 'final-bad', outputPath: afterPath });
+    const finalBadCapture = await captureCurrentCommit(state, { label: 'final-bad', outputPath: afterPath, includeComputedStyle: true });
     assertNotInterrupted();
     const reproductionComparison = await comparePngFiles({
       baselinePath,
@@ -203,6 +205,11 @@ export async function runInvestigation(configPath: string, options: RunOptions =
       pixelColorThreshold: config.pixelColorThreshold,
       maxChangedPixelPercent: config.maxChangedPixelPercent,
     });
+    const styleDifferences = diffComputedStyles(finalGoodCapture.computedStyle ?? {}, finalBadCapture.computedStyle ?? {});
+    await Promise.all([
+      writeFile(path.join(finalDir, 'last-good-styles.json'), JSON.stringify(finalGoodCapture.computedStyle ?? {}, null, 2), 'utf8'),
+      writeFile(path.join(finalDir, 'first-bad-styles.json'), JSON.stringify(finalBadCapture.computedStyle ?? {}, null, 2), 'utf8'),
+    ]);
     assertNotInterrupted();
 
     const [culprit, lastGood, diffText, records] = await Promise.all([
@@ -222,15 +229,16 @@ export async function runInvestigation(configPath: string, options: RunOptions =
       records,
       durationMs,
       diffText,
+      styleDifferences,
       beforeScreenshotPath: beforePath,
       afterScreenshotPath: finalBadCapture.screenshotPath,
       diffImagePath: adjacentDiffPath,
     });
     assertNotInterrupted();
-    const result: RunResult = { reportPath, artifactDir, culprit, lastGood, comparison: adjacentComparison, records, durationMs, diffText };
+    const result: RunResult = { reportPath, artifactDir, culprit, lastGood, comparison: adjacentComparison, records, durationMs, diffText, styleDifferences };
     await writeFile(path.join(artifactDir, 'run-result.json'), JSON.stringify(result, null, 2), 'utf8');
     assertNotInterrupted();
-    console.log(`\nFirst bad commit: ${culprit.shortHash}  ${culprit.subject}`);
+    console.log(`\n${red(bold('First bad commit:'))} ${culprit.shortHash}  ${culprit.subject}`);
     console.log(`Last good commit: ${lastGood.shortHash}`);
     console.log(`Changed pixels:   ${adjacentComparison.changedPixels.toLocaleString()} / ${adjacentComparison.totalPixels.toLocaleString()} (${adjacentComparison.changedPercent.toFixed(3)}%)`);
     console.log(`Comparisons:      ${records.length}`);

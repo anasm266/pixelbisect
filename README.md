@@ -1,5 +1,9 @@
 # PixelBisect
 
+[![CI](https://github.com/anasm266/pixelbisect/actions/workflows/ci.yml/badge.svg)](https://github.com/anasm266/pixelbisect/actions/workflows/ci.yml)
+[![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-323437.svg)](./LICENSE)
+
 PixelBisect is a local visual-regression forensics CLI. Give it a known-good Git commit, a known-bad commit, a page URL, and one CSS selector; it uses Git's native bisect machinery to find the first commit where that element became visually different, then produces a self-contained HTML evidence report.
 
 > Visual testing catches tomorrow's regressions. PixelBisect finds yesterday's.
@@ -20,21 +24,25 @@ Visual-regression tests can tell you that a page is broken today. PixelBisect an
 | Known-good and known-bad references | Install, build, serve, wait, and deterministic Chromium capture | Last-good and first-bad screenshots |
 | One URL and one CSS selector | Thresholded pixel comparison at every selected revision | An interactive offline report, highlighted diff, and culprit Git patch |
 
-The active checkout is never used for historical builds. A typical 64-commit range takes roughly six midpoint comparisons; the included demo completes in about 29 seconds on the verified Windows environment.
+```mermaid
+flowchart LR
+  A[Good and bad commits] --> B[Protected Git worktree]
+  B --> C[Deterministic captures]
+  C --> D[Binary search]
+  D --> E[First bad commit]
+  E --> F[Offline evidence report]
+```
 
-## Built with Codex
+The active checkout is never used for historical builds. A typical 64-commit range takes roughly six midpoint comparisons; the included demo completes in under a minute on the verified Windows environment.
 
-Codex with GPT-5.6 was the primary development agent for PixelBisect. It accelerated the work from product scoping through TypeScript implementation, adversarial test design, Windows process-cleanup debugging, npm packaging, and visual inspection of the final report. The core build session's `/feedback` ID is the development audit trail to include with the Build Week submission.
+## Quick demo
 
-The most important decisions made during that collaboration were to:
+```bash
+npm ci
+npm run demo
+```
 
-- Use native `git bisect run` with first-parent history instead of maintaining a custom search algorithm
-- Protect the active checkout with one detached worktree and treat interruption cleanup as a product feature
-- Keep the demo deliberately narrow and prove it against a generated 64-commit deterministic fixture
-- Make the offline HTML report—not a hosted dashboard—the product's visual UI
-- Require five consecutive full investigations, clean-clone tests, tarball installation, and rendered visual QA before calling the project complete
-
-Codex and GPT-5.6 are development tools here, not runtime dependencies. PixelBisect does not send repository code or screenshots to an AI service and requires no API key.
+The demo command builds PixelBisect, installs its Chromium runtime, recreates the deterministic fixture, performs the complete 64-commit investigation, and prints the path to the self-contained report.
 
 ## What it produces
 
@@ -51,11 +59,26 @@ The report is PixelBisect's visual UI. It contains:
 - Culprit and last-good commit metadata
 - A mouse- and keyboard-controlled before/after slider
 - A highlighted pixel-difference image and changed-pixel statistics
+- Changed computed CSS properties between the adjacent last-good and first-bad commits
 - The tested commits and total duration
 - The investigation configuration
 - An HTML-escaped Git diff between the adjacent last-good and first-bad commits
 
 All images and scripts are embedded in one HTML file; no report server or network connection is required. There is deliberately no live web dashboard.
+
+## Built with Codex
+
+Codex with GPT-5.6 was the primary development agent for PixelBisect. It accelerated the work from product scoping through TypeScript implementation, adversarial test design, Windows process-cleanup debugging, npm packaging, and visual inspection of the final report. The commit history and verification artifacts preserve that development trail.
+
+The most important decisions made during that collaboration were to:
+
+- Use native `git bisect run` with first-parent history instead of maintaining a custom search algorithm
+- Protect the active checkout with one detached worktree and treat interruption cleanup as a product feature
+- Keep the demo deliberately narrow and prove it against a generated 64-commit deterministic fixture
+- Make the offline HTML report—not a hosted dashboard—the product's visual UI
+- Require five consecutive full investigations, clean-clone tests, tarball installation, and rendered visual QA before calling the project complete
+
+Codex and GPT-5.6 are development tools here, not runtime dependencies. PixelBisect does not send repository code or screenshots to an AI service and requires no API key.
 
 ## Requirements and platforms
 
@@ -204,7 +227,7 @@ The CLI prints the exact absolute report path, ending in `report.html`. Run arti
 4. It starts native [Git bisect](https://git-scm.com/docs/git-bisect) with `git bisect start --first-parent`, then invokes `git bisect run` with an internal visual evaluator. Exit code `0` marks a commit good, `1` marks it bad, and infrastructure failures abort the run.
 5. At each selected commit, it reuses installed dependencies while the package lockfile is unchanged, optionally builds, starts the server, polls its readiness URL, and captures the configured element with [Playwright Chromium](https://playwright.dev/docs/screenshots).
 6. [pixelmatch](https://github.com/mapbox/pixelmatch) and pngjs compare the candidate against the baseline without resizing either image. The server process tree is stopped and the port released before another commit is tested.
-7. PixelBisect captures the culprit and its first-parent predecessor again as the final adjacent pair, collects commit metadata and the Git diff, and writes the self-contained report.
+7. PixelBisect captures the culprit and its first-parent predecessor again as the final adjacent pair, compares their computed CSS properties, collects commit metadata and the Git diff, and writes the self-contained report.
 8. Success, handled errors, timeouts, and interruption all enter cleanup, resetting bisect state, stopping child processes, and removing the temporary worktree.
 
 The classification assumes a monotonic transition: commits are visually good up to one boundary and remain bad afterward.
@@ -288,6 +311,7 @@ The final demo gates can be rehearsed with `npm run reliability` (five consecuti
 
 ## Documentation
 
+- [Changelog](./CHANGELOG.md)
 - [Git bisect documentation](https://git-scm.com/docs/git-bisect)
 - [Git worktree documentation](https://git-scm.com/docs/git-worktree)
 - [Playwright browser installation](https://playwright.dev/docs/browsers)

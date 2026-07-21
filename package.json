@@ -1,6 +1,6 @@
 {
   "name": "pixelbisect",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Local visual-regression forensics powered by Git bisect",
   "type": "module",
   "bin": {

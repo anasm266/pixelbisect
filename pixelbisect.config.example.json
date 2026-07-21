@@ -7,8 +7,8 @@
   "startCommand": "npm run dev -- --host 127.0.0.1 --port 4173 --strictPort",
   "port": 4173,
   "readinessUrl": "http://127.0.0.1:4173/",
-  "targetUrl": "http://127.0.0.1:4173/checkout",
-  "selector": "#checkout-button",
+  "targetUrl": "http://127.0.0.1:4173/dispatch",
+  "selector": "#fleet-board",
   "viewport": {
     "width": 1280,
     "height": 720
@@ -16,5 +16,5 @@
   "startupTimeoutMs": 15000,
   "captureTimeoutMs": 10000,
   "pixelColorThreshold": 0.1,
-  "maxChangedPixelPercent": 0.5
+  "maxChangedPixelPercent": 0.1
 }

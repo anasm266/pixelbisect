@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 — 2026-07-21
+
+- Replace the toy checkout regression with a polished fleet-operations investigation.
+- Demonstrate a realistic design-token blast radius: valid driver data disappears beneath shared map overlays.
+- Keep the fixture deterministic, fixed-size, offline, and reproducible across its complete 64-commit history.
+- Refresh the demo narrative, configuration, tests, report evidence, and promotional media around the stronger case.
+
 ## 0.1.0 — 2026-07-19
 
 - Locate the first visual regression across first-parent Git history with deterministic Chromium captures.

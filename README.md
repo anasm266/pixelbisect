@@ -44,6 +44,8 @@ npm run demo
 
 The demo command builds PixelBisect, installs its Chromium runtime, recreates the deterministic fixture, performs the complete 64-commit investigation, and prints the path to the self-contained report.
 
+The fixture is a polished fleet-operations dashboard. It reports 18 drivers online while a shared map-layer token causes seven of them to disappear underneath service-zone overlays. The driver data and DOM remain correct; the planted historical commit changes only `--layer-map-marker: 30` to `3`. PixelBisect traces that product-level symptom back to the distant design-token refactor.
+
 ## What it produces
 
 One command performs endpoint verification, automated bisection, adjacent final captures, and report generation:
@@ -118,7 +120,7 @@ npx pixelbisect run pixelbisect.config.json
 For a packaged but unpublished build, replace `pixelbisect` with the tarball path:
 
 ```bash
-npm install --save-dev /path/to/pixelbisect-0.1.0.tgz
+npm install --save-dev /path/to/pixelbisect-0.2.0.tgz
 npx pixelbisect install-browser
 npx pixelbisect run pixelbisect.config.json
 ```
@@ -131,7 +133,7 @@ The release tarball contains both the compiled CLI and the deterministic demo-fi
 mkdir pixelbisect-judge-test
 cd pixelbisect-judge-test
 npm init -y
-npm install --save-dev /path/to/pixelbisect-0.1.0.tgz
+npm install --save-dev /path/to/pixelbisect-0.2.0.tgz
 npx pixelbisect install-browser
 node node_modules/pixelbisect/dist/fixture/generate.js ./demo-fixture
 npx pixelbisect run ./demo-fixture/pixelbisect.config.json
@@ -155,8 +157,8 @@ Copy [`pixelbisect.config.example.json`](./pixelbisect.config.example.json) to `
   "startCommand": "npm run dev -- --host 127.0.0.1 --port 4173 --strictPort",
   "port": 4173,
   "readinessUrl": "http://127.0.0.1:4173/",
-  "targetUrl": "http://127.0.0.1:4173/checkout",
-  "selector": "#checkout-button",
+  "targetUrl": "http://127.0.0.1:4173/dispatch",
+  "selector": "#fleet-board",
   "viewport": {
     "width": 1280,
     "height": 720
@@ -164,7 +166,7 @@ Copy [`pixelbisect.config.example.json`](./pixelbisect.config.example.json) to `
   "startupTimeoutMs": 15000,
   "captureTimeoutMs": 10000,
   "pixelColorThreshold": 0.1,
-  "maxChangedPixelPercent": 0.5
+  "maxChangedPixelPercent": 0.1
 }
 ```
 
@@ -209,7 +211,7 @@ On macOS or Linux, replace the `Copy-Item` line with:
 cp pixelbisect.config.example.json pixelbisect.config.json
 ```
 
-The fixture generator creates a deterministic Vite repository with a linear 64-commit history, stable lockfile and selector, `visual-good` and `visual-bad` tags, and one planted CSS regression. The example configuration watches `#checkout-button` at `/checkout`.
+The fixture generator creates a deterministic Vite repository with a linear 64-commit history, stable lockfile and selector, `visual-good` and `visual-bad` tags, and one planted CSS regression. The example configuration watches the fixed-size `#fleet-board` dashboard at `/dispatch`. At the culprit commit, an innocuous shared overlay token moves driver markers below two opaque service-zone layers without changing the underlying data or element dimensions.
 
 Run artifacts are stored outside the investigated repository at:
 

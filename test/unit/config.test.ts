@@ -8,7 +8,7 @@ import { temporaryDirectory } from '../helpers.js';
 
 const valid = {
   repoPath: './repo', goodCommit: 'good', installCommand: 'npm ci', startCommand: 'npm start', port: 4173,
-  readinessUrl: 'http://127.0.0.1:4173', targetUrl: 'http://127.0.0.1:4173/checkout', selector: '#button',
+  readinessUrl: 'http://127.0.0.1:4173', targetUrl: 'http://127.0.0.1:4173/dispatch', selector: '#fleet-board',
 };
 
 test('validates configuration, resolves repo path, and applies defaults', () => {

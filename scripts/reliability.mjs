@@ -47,7 +47,7 @@ async function inspectBisectState(repo) {
   return { refs: refs.stdout.trim().split(/\r?\n/).filter(Boolean), presentFiles };
 }
 
-const expected = (await command('git', ['log', '--format=%H', '--fixed-strings', '--grep=fix(theme): align primary action with neutral palette', 'visual-good..visual-bad'], repoPath)).stdout.trim().split(/\r?\n/)[0];
+const expected = (await command('git', ['log', '--format=%H', '--fixed-strings', '--grep=refactor(theme): normalize map overlay layers', 'visual-good..visual-bad'], repoPath)).stdout.trim().split(/\r?\n/)[0];
 if (!expected) throw new Error('Could not resolve the planted fixture culprit.');
 const initialStatus = (await command('git', ['status', '--porcelain=v1'], repoPath)).stdout;
 const runs = [];
@@ -81,7 +81,7 @@ for (let index = 1; index <= 5; index += 1) {
     progressContract: /Range: 64 commits/.test(invocation.stdout)
       && /install\s+(dependencies|reused)/.test(invocation.stdout)
       && /start\s+port/.test(invocation.stdout)
-      && /capture\s+#checkout-button/.test(invocation.stdout)
+      && /capture\s+#fleet-board/.test(invocation.stdout)
       && /compare\s+good baseline/.test(invocation.stdout)
       && /\[\d+\/6\].*(GOOD|BAD).*% changed.*remaining.*elapsed/.test(invocation.stdout),
   };

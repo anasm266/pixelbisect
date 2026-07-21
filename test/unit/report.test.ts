@@ -24,7 +24,7 @@ test('generates one offline report with embedded images, slider, escaped reposit
     configPath: path.join(dir, 'config.json'), repoPath: '<unsafe>&repo', goodCommit: 'good', badCommit: 'bad',
     goodHash: 'a'.repeat(40), badHash: 'b'.repeat(40), commitCount: 2,
     installCommand: 'npm ci <unsafe-install>', buildCommand: null, startCommand: 'npm start', port: 4173,
-    readinessUrl: 'http://127.0.0.1:4173', targetUrl: 'http://127.0.0.1:4173/checkout', selector: '#button',
+    readinessUrl: 'http://127.0.0.1:4173', targetUrl: 'http://127.0.0.1:4173/dispatch', selector: '#fleet-board',
     viewport: { width: 1280, height: 720 }, startupTimeoutMs: 1000, captureTimeoutMs: 1000,
     pixelColorThreshold: 0.1, maxChangedPixelPercent: 0.5,
   };

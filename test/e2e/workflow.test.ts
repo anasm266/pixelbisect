@@ -78,9 +78,11 @@ test('complete workflow identifies the planted culprit twice and produces a work
     assert.equal(lockChanges.stdout, '', 'no intermediate commit may alter the lockfile');
     assert.equal(appChanges.stdout, '', 'runtime/package files must remain stable across the range');
     assert.equal(cssChanges.stdout.trim(), fixture.culpritHash, 'only the planted culprit may alter rendering CSS');
-    assert.match(mainSource.stdout, /id="checkout-button"/);
+    assert.match(mainSource.stdout, /id="fleet-board"/);
+    assert.equal((mainSource.stdout.match(/class="driver-marker/g) ?? []).length, 18, 'fixture should contain all 18 driver markers in the DOM');
+    assert.match(mainSource.stdout, /18 drivers online/);
     assert.doesNotMatch(`${mainSource.stdout}\n${cssSource.stdout}`, /Math\.random|Date\.|fetch\(|XMLHttpRequest|https?:\/\/|animation\s*:|transition\s*:/i);
-    assert.match(cssSource.stdout, /Arial, Helvetica, sans-serif/);
+    assert.match(cssSource.stdout, /ui-sans-serif, -apple-system/);
     await writeFile(path.join(fixture.repoPath, 'keep-uncommitted.txt'), 'must survive every run\n', 'utf8');
     const statusBefore = (await runExecutable('git', ['status', '--porcelain=v1'], { cwd: fixture.repoPath })).stdout;
     const headBefore = (await runExecutable('git', ['rev-parse', 'HEAD'], { cwd: fixture.repoPath })).stdout.trim();
@@ -88,15 +90,17 @@ test('complete workflow identifies the planted culprit twice and produces a work
     const first = await runInvestigation(fixture.configPath, { artifactRoot: path.join(root, 'artifacts-first') });
     assert.equal(first.culprit.hash, fixture.culpritHash);
     assert.equal(first.records.length, 6);
+    assert.ok(first.comparison.changedPercent > 0.1, 'the missing-marker regression must exceed the configured demo threshold');
     const expectedLastGood = (await runExecutable('git', ['rev-parse', `${fixture.culpritHash}^1`], { cwd: fixture.repoPath })).stdout.trim();
     assert.equal(first.lastGood.hash, expectedLastGood);
-    assert.match(first.diffText, /--button-primary: #2563eb/);
-    assert.match(first.diffText, /\+  --button-primary: #e5e7eb/);
+    assert.match(first.diffText, /--layer-map-marker: 30/);
+    assert.match(first.diffText, /\+  --layer-map-marker: 3/);
     const artifactFiles = await readdir(first.artifactDir, { recursive: true });
     assert.equal(artifactFiles.filter((entry) => String(entry).endsWith('install.log')).length, 1, 'unchanged lockfile should install exactly once');
     for (const name of ['final/before.png', 'final/after.png', 'final/diff.png', 'final/last-good-styles.json', 'final/first-bad-styles.json', 'git-bisect.log', 'cleanup.json']) await access(path.join(first.artifactDir, name));
-    assert.ok(first.styleDifferences.some((difference) => difference.property === 'background-color'));
-    assert.ok(first.styleDifferences.some((difference) => difference.property === '--button-primary'));
+    assert.deepEqual(first.styleDifferences.find((difference) => difference.property === '--layer-map-marker'), {
+      property: '--layer-map-marker', lastGood: '30', firstBad: '3',
+    });
     const [beforePng, afterPng] = await Promise.all([
       readFile(path.join(first.artifactDir, 'final', 'before.png')).then((buffer) => PNG.sync.read(buffer)),
       readFile(path.join(first.artifactDir, 'final', 'after.png')).then((buffer) => PNG.sync.read(buffer)),
@@ -117,19 +121,10 @@ test('complete workflow identifies the planted culprit twice and produces a work
       const naturalSizes = await page.locator('#comparison img').evaluateAll((images) => images.map((image) => ({ width: (image as HTMLImageElement).naturalWidth, height: (image as HTMLImageElement).naturalHeight })));
       assert.deepEqual(naturalSizes[0], naturalSizes[1]);
       assert.match(await page.locator('body').innerText(), new RegExp(fixture.culpritHash.slice(0, 7)));
-      assert.match(await page.locator('pre').innerText(), /--button-primary: #2563eb/);
+      assert.match(await page.locator('pre').innerText(), /--layer-map-marker: 30/);
       assert.match(await page.locator('body').innerText(), /Rendered style changes/);
-      assert.match(await page.locator('body').innerText(), /background-color/);
+      assert.match(await page.locator('body').innerText(), /--layer-map-marker/);
       const slider = page.locator('#slider');
-      const comparisonPng = PNG.sync.read(await page.locator('#comparison').screenshot());
-      const sample = (x: number, y: number) => {
-        const offset = (Math.floor(y * comparisonPng.height) * comparisonPng.width + Math.floor(x * comparisonPng.width)) * 4;
-        return [...comparisonPng.data.subarray(offset, offset + 3)];
-      };
-      const leftPixel = sample(0.25, 0.75);
-      const rightPixel = sample(0.75, 0.75);
-      assert.ok(leftPixel[2] > leftPixel[0] + 100, `left side should show blue last-good image, got ${leftPixel}`);
-      assert.ok(Math.max(...rightPixel) - Math.min(...rightPixel) < 15, `right side should show neutral first-bad image, got ${rightPixel}`);
       const sliderBox = await slider.boundingBox();
       assert.ok(sliderBox);
       await page.mouse.click(sliderBox.x + sliderBox.width * 0.31, sliderBox.y + sliderBox.height / 2);

@@ -56,8 +56,8 @@ PixelBisect accepts `pixelbisect.config.json` containing:
   "startCommand": "npm run dev -- --port 4173",
   "port": 4173,
   "readinessUrl": "http://127.0.0.1:4173",
-  "targetUrl": "http://127.0.0.1:4173/checkout",
-  "selector": "#checkout-button",
+  "targetUrl": "http://127.0.0.1:4173/dispatch",
+  "selector": "#fleet-board",
   "viewport": {
     "width": 1280,
     "height": 720
@@ -65,7 +65,7 @@ PixelBisect accepts `pixelbisect.config.json` containing:
   "startupTimeoutMs": 15000,
   "captureTimeoutMs": 10000,
   "pixelColorThreshold": 0.1,
-  "maxChangedPixelPercent": 0.5
+  "maxChangedPixelPercent": 0.1
 }
 ```
 
@@ -297,7 +297,7 @@ Acceptance criteria:
 - Each row shows the property name, good value, and bad value.
 - The comparison is descriptive evidence, not a causality claim.
 
-PixelBisect does not automatically map computed properties to source lines. The ordinary culprit Git diff supplies the source evidence. The planted demonstration regression should contain one obvious CSS custom-property change so the relevant line is immediately visible.
+PixelBisect does not automatically map computed properties to source lines. The ordinary culprit Git diff supplies the source evidence. The planted demonstration regression contains one obvious map-layer custom-property change so the relevant line is immediately visible.
 
 ---
 
@@ -351,21 +351,21 @@ A Git worktree protects the active checkout; it does not sandbox arbitrary code.
 The controlled demo repository must have:
 
 - A Vite application
-- A simple checkout page
-- One stable watched selector, such as `#checkout-button`
+- A polished fleet-operations dashboard
+- One stable, fixed-size watched selector: `#fleet-board`
 - System fonts only
 - No animations, timestamps, randomized content, remote APIs, authentication, or feature flags
 - A linear history of 64 believable commits
 - An unchanged lockfile throughout the selected range
 - Every commit installable and runnable
-- One commit near the middle that changes a CSS custom property and visibly breaks the checkout button
+- One commit near the middle that changes a CSS custom property and moves driver markers underneath service-zone overlays
 - No other visual changes to the watched element between the known-good and known-bad endpoints
 
 Example planted regression:
 
 ```diff
-- --button-primary: #2563eb;
-+ --button-primary: #e5e7eb;
+- --layer-map-marker: 30;
++ --layer-map-marker: 3;
 ```
 
 Use tags such as `visual-good` and `visual-bad` to make the demonstration configuration readable.
@@ -374,8 +374,8 @@ Use tags such as `visual-good` and `visual-bad` to make the demonstration config
 
 # Demonstration script
 
-1. Show the broken checkout button at the bad commit.
-2. Explain: “This button looked correct 64 commits ago. Which commit changed it?”
+1. Show the bad fleet dashboard: it says 18 drivers are online, but seven markers have disappeared beneath the service zones.
+2. Explain: “The data and DOM still contain all 18 drivers. This map looked correct 64 commits ago. Which commit changed it?”
 3. Briefly show `pixelbisect.config.json`.
 4. Run `pixelbisect run pixelbisect.config.json`.
 5. Let endpoint verification establish the good baseline and confirm the bad endpoint.

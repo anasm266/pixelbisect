@@ -194,7 +194,7 @@ export async function startServer(options: {
       // npm/cmd process trees can briefly look terminated before a late child
       // binds the requested port. Require a quiet window so the next capture
       // cannot connect to a server left behind by an interrupted startup.
-      const deadline = Date.now() + 5_000;
+      const deadline = Date.now() + 10_000;
       let quietSince: number | undefined;
       while (Date.now() < deadline) {
         if (await isPortOpen(options.port)) {
@@ -202,7 +202,7 @@ export async function startServer(options: {
           await terminateProcessesOnPort(options.port);
         } else {
           quietSince ??= Date.now();
-          if (Date.now() - quietSince >= 750) return;
+          if (Date.now() - quietSince >= 2_000) return;
         }
         await new Promise((resolve) => setTimeout(resolve, 100));
       }

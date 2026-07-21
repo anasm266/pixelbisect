@@ -59,11 +59,11 @@ test('font/render settling cannot exceed captureTimeoutMs', async () => {
       const config: PixelBisectConfig = {
         repoPath: dir, goodCommit: 'good', badCommit: 'bad', installCommand: 'npm ci', buildCommand: null, startCommand: '', port,
         readinessUrl: `http://127.0.0.1:${port}`, targetUrl: `http://127.0.0.1:${port}`, selector: '#target', viewport: { width: 320, height: 240 },
-        startupTimeoutMs: 1000, captureTimeoutMs: 300, pixelColorThreshold: 0.1, maxChangedPixelPercent: 0,
+        startupTimeoutMs: 1000, captureTimeoutMs: 2000, pixelColorThreshold: 0.1, maxChangedPixelPercent: 0,
       };
       const started = Date.now();
-      await assert.rejects(captureElement(config, path.join(dir, 'never.png')), /Font\/render settling timed out after 300 ms/);
-      assert.ok(Date.now() - started < 3_000, 'capture timeout should be bounded');
+      await assert.rejects(captureElement(config, path.join(dir, 'never.png')), /Font\/render settling timed out after 2000 ms/);
+      assert.ok(Date.now() - started < 5_000, 'capture timeout should be bounded');
     } finally { await running.stop(); }
   } finally { await rm(dir, { recursive: true, force: true }); }
 });

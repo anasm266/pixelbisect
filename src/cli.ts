@@ -10,7 +10,7 @@ import { runInvestigation } from './runner.js';
 
 async function version(): Promise<string> {
   const packagePath = fileURLToPath(new URL('../package.json', import.meta.url));
-  try { return (JSON.parse(await readFile(packagePath, 'utf8')) as { version: string }).version; } catch { return '0.2.0'; }
+  try { return (JSON.parse(await readFile(packagePath, 'utf8')) as { version: string }).version; } catch { return '0.2.1'; }
 }
 
 function help(): void {

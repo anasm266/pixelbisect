@@ -190,7 +190,24 @@ export async function startServer(options: {
 
   const stop = async () => {
     await terminateProcessTree(child);
-    if (await isPortOpen(options.port)) await terminateProcessesOnPort(options.port);
+    if (process.platform === 'win32') {
+      // npm/cmd process trees can briefly look terminated before a late child
+      // binds the requested port. Require a quiet window so the next capture
+      // cannot connect to a server left behind by an interrupted startup.
+      const deadline = Date.now() + 5_000;
+      let quietSince: number | undefined;
+      while (Date.now() < deadline) {
+        if (await isPortOpen(options.port)) {
+          quietSince = undefined;
+          await terminateProcessesOnPort(options.port);
+        } else {
+          quietSince ??= Date.now();
+          if (Date.now() - quietSince >= 750) return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      throw new PixelBisectError(`Port ${options.port} remained occupied after the server was stopped.`);
+    }
     await waitForPortRelease(options.port);
   };
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 — 2026-07-21
+
+- Harden Windows server cleanup after interrupted startups by waiting for a stable port release and terminating late listeners.
+- Run compiled tests through a cross-platform file enumerator instead of shell-dependent glob expansion.
+
 ## 0.2.0 — 2026-07-21
 
 - Replace the toy checkout regression with a polished fleet-operations investigation.

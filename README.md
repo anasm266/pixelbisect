@@ -120,7 +120,7 @@ npx pixelbisect run pixelbisect.config.json
 For a packaged but unpublished build, replace `pixelbisect` with the tarball path:
 
 ```bash
-npm install --save-dev /path/to/pixelbisect-0.2.0.tgz
+npm install --save-dev /path/to/pixelbisect-0.2.1.tgz
 npx pixelbisect install-browser
 npx pixelbisect run pixelbisect.config.json
 ```
@@ -133,7 +133,7 @@ The release tarball contains both the compiled CLI and the deterministic demo-fi
 mkdir pixelbisect-judge-test
 cd pixelbisect-judge-test
 npm init -y
-npm install --save-dev /path/to/pixelbisect-0.2.0.tgz
+npm install --save-dev /path/to/pixelbisect-0.2.1.tgz
 npx pixelbisect install-browser
 node node_modules/pixelbisect/dist/fixture/generate.js ./demo-fixture
 npx pixelbisect run ./demo-fixture/pixelbisect.config.json

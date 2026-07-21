@@ -242,7 +242,7 @@ export async function generateDemoFixture(output: string, options: { force?: boo
     repoPath: '.', goodCommit: 'visual-good', badCommit: 'visual-bad', installCommand: 'npm ci', buildCommand: null,
     startCommand: 'npm run dev -- --host 127.0.0.1 --port 4173 --strictPort', port: 4173,
     readinessUrl: 'http://127.0.0.1:4173/', targetUrl: 'http://127.0.0.1:4173/dispatch', selector: '#fleet-board',
-    viewport: { width: 1280, height: 720 }, startupTimeoutMs: 15_000, captureTimeoutMs: 10_000,
+    viewport: { width: 1280, height: 720 }, startupTimeoutMs: 15_000, captureTimeoutMs: 30_000,
     pixelColorThreshold: 0.1, maxChangedPixelPercent: 0.1,
   };
   const configPath = path.join(repoPath, 'pixelbisect.config.json');

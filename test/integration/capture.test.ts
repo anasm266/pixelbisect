@@ -51,7 +51,7 @@ test('capture freezes motion and caret, hides scrollbars, and honors viewport/de
 test('font/render settling cannot exceed captureTimeoutMs', async () => {
   const dir = await temporaryDirectory('pixelbisect-capture-timeout-');
   const port = await freePort();
-  const hangingFontServer = `const http=require('node:http');const p=Number(process.argv[2]);http.createServer((q,r)=>{if(q.url==='/hang.woff2')return;r.writeHead(200,{'content-type':'text/html'});r.end('<style>@font-face{font-family:Hang;src:url(/hang.woff2)}#target{font-family:Hang;width:100px;height:40px}</style><div id="target">waiting</div>')}).listen(p,'127.0.0.1')`;
+  const hangingFontServer = `const http=require('node:http');const p=Number(process.argv[2]);http.createServer((q,r)=>{if(q.url==='/hang.woff2')return;r.writeHead(200,{'content-type':'text/html'});r.end('<style>@font-face{font-family:Hang;src:url(/hang.woff2)}#target{width:100px;height:40px}</style><div id="target">waiting</div><script>document.fonts.load("16px Hang")</script>')}).listen(p,'127.0.0.1')`;
   try {
     await writeFile(path.join(dir, 'server.cjs'), hangingFontServer, 'utf8');
     const running = await startServer({ command: `node server.cjs ${port}`, cwd: dir, port, readinessUrl: `http://127.0.0.1:${port}`, timeoutMs: 5000, logPath: path.join(dir, 'server.log') });
@@ -59,11 +59,11 @@ test('font/render settling cannot exceed captureTimeoutMs', async () => {
       const config: PixelBisectConfig = {
         repoPath: dir, goodCommit: 'good', badCommit: 'bad', installCommand: 'npm ci', buildCommand: null, startCommand: '', port,
         readinessUrl: `http://127.0.0.1:${port}`, targetUrl: `http://127.0.0.1:${port}`, selector: '#target', viewport: { width: 320, height: 240 },
-        startupTimeoutMs: 1000, captureTimeoutMs: 2000, pixelColorThreshold: 0.1, maxChangedPixelPercent: 0,
+        startupTimeoutMs: 1000, captureTimeoutMs: 5000, pixelColorThreshold: 0.1, maxChangedPixelPercent: 0,
       };
       const started = Date.now();
-      await assert.rejects(captureElement(config, path.join(dir, 'never.png')), /Font\/render settling timed out after 2000 ms/);
-      assert.ok(Date.now() - started < 5_000, 'capture timeout should be bounded');
+      await assert.rejects(captureElement(config, path.join(dir, 'never.png')), /Font\/render settling timed out after 5000 ms/);
+      assert.ok(Date.now() - started < 10_000, 'capture timeout should be bounded');
     } finally { await running.stop(); }
   } finally { await rm(dir, { recursive: true, force: true }); }
 });

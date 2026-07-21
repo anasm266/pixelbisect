@@ -1,6 +1,7 @@
 # PixelBisect
 
 [![CI](https://github.com/anasm266/pixelbisect/actions/workflows/ci.yml/badge.svg)](https://github.com/anasm266/pixelbisect/actions/workflows/ci.yml)
+[![Release: v0.2.1](https://img.shields.io/badge/release-v0.2.1-b8e33d)](https://github.com/anasm266/pixelbisect/releases/tag/v0.2.1)
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-323437.svg)](./LICENSE)
 
@@ -82,6 +83,19 @@ The most important decisions made during that collaboration were to:
 
 Codex and GPT-5.6 are development tools here, not runtime dependencies. PixelBisect does not send repository code or screenshots to an AI service and requires no API key.
 
+## Verification snapshot
+
+The v0.2.1 submission was verified with:
+
+- 34 unit, integration, and end-to-end tests
+- Five consecutive full 64-commit investigations
+- GitHub Actions on Windows and Ubuntu
+- A clean-clone source test
+- Installation and execution from the published release tarball
+- Rendered visual QA of the generated offline report
+
+The deterministic fixture resolves the 64-commit range in six midpoint comparisons and identifies commit `7e85d70` (`refactor(theme): normalize map overlay layers`). The final adjacent comparison detects 1,589 changed pixels out of 778,800, or 0.204%.
+
 ## Requirements and platforms
 
 - Node.js 20 or newer
@@ -89,7 +103,7 @@ Codex and GPT-5.6 are development tools here, not runtime dependencies. PixelBis
 - npm
 - Playwright's Chromium browser binary
 
-Windows 10/11 is the primary and fully verified demo platform; PixelBisect uses Windows process-tree termination there. macOS and Linux use POSIX process-group cleanup and are expected to work where the Node.js, Git, npm, and Playwright requirements are available, but they are not part of the current release verification matrix.
+Windows 10/11 is the primary fully verified demo platform; PixelBisect uses Windows process-tree termination there. Ubuntu Linux is verified through the GitHub Actions test matrix and uses POSIX process-group cleanup. macOS uses the same POSIX cleanup path and is expected to work where the Node.js, Git, npm, and Playwright requirements are available, but it is not part of the current verification matrix.
 
 ## Installation
 
@@ -313,6 +327,7 @@ The final demo gates can be rehearsed with `npm run reliability` (five consecuti
 
 ## Documentation
 
+- [About the project](./ABOUT_PROJECT.md)
 - [Changelog](./CHANGELOG.md)
 - [Git bisect documentation](https://git-scm.com/docs/git-bisect)
 - [Git worktree documentation](https://git-scm.com/docs/git-worktree)

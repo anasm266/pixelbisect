@@ -11,3 +11,11 @@ reliability-results/
 *.log
 pixelbisect.config.json
 promo-work/
+
+# Local hackathon submission and rendered media artifacts
+/DEVPOST_SUBMISSION.md
+/PROJECT_STORY.md
+/PixelBisect-Judge-Package-*.zip
+/submission-assets/
+/submission-package/
+/submission-video/
